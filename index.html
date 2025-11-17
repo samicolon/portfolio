@@ -15,8 +15,8 @@
     justify-content: center;
     text-align: center;
 
-    background-color: #f4f4f4; /* light grey background */
-    color: #222;              /* dark grey text */
+    background-color: #f4f4f4;
+    color: #222;
     font-family: 'Inter', sans-serif;
   }
 
@@ -24,9 +24,9 @@
     font-weight: 600;
   }
 
-  /* Reusable navigation button */
+  /* Navigation button with NO hover/click movement */
   .nav-button {
-    position: fixed;          /* stays 22px from top/left of viewport */
+    position: fixed;
     top: 22px;
     left: 22px;
 
@@ -41,31 +41,40 @@
     align-items: center;
     justify-content: center;
 
-    box-shadow: 0px 9px 27px -5px rgba(0, 0, 0, 0.2); /* your shadow */
+    box-shadow: 0px 9px 27px -5px rgba(0, 0, 0, 0.2);
+
     cursor: pointer;
-
-    color: #222;
-    font-size: 20px;
-    font-weight: 500;
+    padding: 0;
   }
 
-  .nav-button:hover {
-    transform: translateY(-1px);
-  }
-
+  /* Remove all transforms / movement */
+  .nav-button:hover,
   .nav-button:active {
-    transform: translateY(0);
-    box-shadow: 0px 5px 18px -4px rgba(0, 0, 0, 0.25);
+    transform: none;
+    box-shadow: 0px 9px 27px -5px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Ensure SVG scales nicely */
+  .nav-button svg {
+    width: 28px;
+    height: 28px;
   }
 </style>
 </head>
 
 <body>
-  <!-- Reusable navigation button -->
-  <button class="nav-button" aria-label="Back">
-    ←
-  </button>
 
-  <h1>Something is brewing.</h1>
+<button class="nav-button" aria-label="Back">
+  <!-- SVG with color changed to #3C3C3C -->
+  <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M25.601 10.236C28.4282 10.236 30.72 7.9449 30.72 5.11872C30.72 2.29254 28.4282 0.00146484 25.601 0.00146484C22.7739 0.00146484 20.4821 2.29254 20.4821 5.11872C20.4821 7.9449 22.7739 10.236 25.601 10.236Z" fill="#3C3C3C"/>
+    <path d="M5.11902 30.7124C7.94617 30.7124 10.238 28.4213 10.238 25.5952C10.238 22.769 7.94617 20.4779 5.11902 20.4779C2.29186 20.4779 0 22.769 0 25.5952C0 28.4213 2.29186 30.7124 5.11902 30.7124Z" fill="#3C3C3C"/>
+    <path d="M30.7193 25.5952C30.7193 25.4257 30.7193 25.259 30.6955 25.0922C30.6955 25.0578 30.6955 25.026 30.6955 24.9916C30.15 20.2026 23.2646 15.8055 17.9337 15.3634C17.9337 15.3634 23.54 17.5209 20.9289 23.5329C20.9103 23.5779 20.8891 23.6229 20.8732 23.6653C20.8574 23.7076 20.8494 23.7182 20.8388 23.7474C20.608 24.3379 20.4894 24.9664 20.4893 25.6005C20.487 26.3549 20.6521 27.1004 20.9727 27.7833C21.2932 28.4663 21.7612 29.0697 22.343 29.5502C22.5979 29.7578 22.8709 29.942 23.1587 30.1009C23.4521 30.2583 23.7598 30.3877 24.0776 30.4874C24.844 30.7261 25.6557 30.7813 26.4474 30.6485C27.239 30.5157 27.9883 30.1987 28.6348 29.723C29.2813 29.2474 29.8068 28.6264 30.1689 27.9102C30.531 27.1941 30.7195 26.4029 30.7193 25.6005V25.5952Z" fill="#3C3C3C"/>
+    <path d="M9.80356 7.18341C9.82474 7.1384 9.84328 7.0934 9.86182 7.05104C9.88036 7.00869 9.883 6.9981 9.89624 6.96898C10.1684 6.26817 10.2827 5.51603 10.2311 4.76605C10.1795 4.01607 9.96321 3.28666 9.59765 2.6297C9.23209 1.97275 8.72622 1.40437 8.11601 0.965C7.50581 0.525628 6.80627 0.22605 6.06712 0.0875704C5.32797 -0.0509097 4.56737 -0.0248895 3.83942 0.163779C3.11147 0.352447 2.43405 0.69913 1.85532 1.17917C1.27659 1.65922 0.810772 2.26083 0.490993 2.94123C0.171214 3.62164 0.00532578 4.36412 0.00512695 5.11587C0.00512695 5.2853 0.00512655 5.45208 0.0316088 5.61886C0.0316088 5.65327 0.0316096 5.68504 0.0448507 5.71945C0.574496 10.5084 7.45988 14.9056 12.804 15.3477C12.7987 15.3583 7.19241 13.1954 9.80356 7.18341Z" fill="#3C3C3C"/>
+  </svg>
+</button>
+
+<h1>Something is brewing.</h1>
+
 </body>
 </html>
