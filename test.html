@@ -17,6 +17,16 @@
     background-color: #f4f4f4;
     color: #222;
     font-family: 'Inter', sans-serif;
+    transition: filter 320ms ease;
+  }
+
+  .content {
+    transition: filter 320ms ease, opacity 320ms ease;
+  }
+
+  body.blurred .content {
+    filter: blur(6px) saturate(.95) contrast(.98);
+    pointer-events: none;
   }
 
   h1 { font-weight: 600; }
@@ -36,13 +46,12 @@
     box-shadow: 0px 9px 27px -5px rgba(0,0,0,0.2);
     cursor: pointer;
     padding: 0;
+    z-index: 999;
   }
 
-  /* Prevent any movement on hover/click */
   .nav-button:hover,
   .nav-button:active { transform: none; box-shadow: 0px 9px 27px -5px rgba(0,0,0,0.2); }
 
-  /* SVG sizing and will-change for smoother animation */
   .nav-button svg {
     width: 28px;
     height: 28px;
@@ -50,7 +59,6 @@
     display: block;
   }
 
-  /* Optional visual state while loading */
   .nav-button[aria-busy="true"] {
     outline: 2px solid rgba(60,60,60,0.06);
   }
@@ -59,9 +67,8 @@
 
 <body>
 
-<!-- include the uploaded file path as a data attribute (requested) -->
+<!-- local uploaded file path included as requested -->
 <button class="nav-button" aria-label="Back" data-screenshot-url="/mnt/data/Screenshot 2025-11-17 at 3.51.48 PM.png" aria-busy="false">
-  <!-- SVG with color #3C3C3C -->
   <svg id="spin-svg" width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
     <path d="M25.601 10.236C28.4282 10.236 30.72 7.9449 30.72 5.11872C30.72 2.29254 28.4282 0.00146484 25.601 0.00146484C22.7739 0.00146484 20.4821 2.29254 20.4821 5.11872C20.4821 7.9449 22.7739 10.236 25.601 10.236Z" fill="#3C3C3C"/>
     <path d="M5.11902 30.7124C7.94617 30.7124 10.238 28.4213 10.238 25.5952C10.238 22.769 7.94617 20.4779 5.11902 20.4779C2.29186 20.4779 0 22.769 0 25.5952C0 28.4213 2.29186 30.7124 5.11902 30.7124Z" fill="#3C3C3C"/>
@@ -70,115 +77,103 @@
   </svg>
 </button>
 
-<h1>Something is testing.</h1>
+<main class="content">
+  <h1>Something is brewing.</h1>
+</main>
 
 <script>
 (function () {
-  // Target SVG element (we rotate the SVG element directly)
   const svg = document.getElementById('spin-svg');
   const btn = svg.closest('.nav-button');
 
-  // rotation state (degrees)
-  let angle = 0;
+  // preserved uploaded-file local path (provided)
+  const screenshotUrl = btn.dataset.screenshotUrl || '/mnt/data/Screenshot 2025-11-17 at 3.51.48 PM.png';
 
-  // current angular velocity (deg per second)
-  let velocity = 0;
-
-  // target angular velocity (deg per second)
-  let targetVelocity = 0;
-
-  // config: feel free to tweak
-  const MAX_VELOCITY = 1080; // deg/sec (~3 rotations/sec)
-  const ACCELERATION = 2200; // deg/sec^2 (how fast it ramps up)
-  const DECELERATION = 1600; // deg/sec^2 (how fast it slows)
-  const EPS = 0.5; // when velocity small enough, snap to 0
-
-  let lastTs = null;
+  // state
   let rafId = null;
-  let loadingMode = false; // true while page is loading / user-triggered persistent spin
+  let startTime = null;
+  let startAngle = 0;
 
-  // animation loop
-  function loop(ts) {
-    if (!lastTs) lastTs = ts;
-    const dt = (ts - lastTs) / 1000; // seconds
-    lastTs = ts;
+  // animation settings (entire animation lasts exactly DURATION ms)
+  const DURATION = 2000;        // ms (2 seconds total)
+  const TOTAL_ROTATIONS = 3;    // how many full rotations over the duration (tweakable)
 
-    // Move velocity toward targetVelocity using accel/decel
-    if (velocity < targetVelocity) {
-      // accelerate
-      velocity = Math.min(targetVelocity, velocity + ACCELERATION * dt);
-    } else if (velocity > targetVelocity) {
-      // decelerate
-      velocity = Math.max(targetVelocity, velocity - DECELERATION * dt);
-    }
+  // easing: easeInOutCubic
+  function easeInOutCubic(t) {
+    return t < 0.5
+      ? 4 * t * t * t
+      : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
 
-    // integrate angle
-    angle = (angle + velocity * dt) % 360;
+  // render frame for time-based eased animation
+  function frame(now) {
+    if (!startTime) startTime = now;
+    const elapsed = now - startTime;
+    const clamped = Math.min(elapsed, DURATION);
+    const progress = clamped / DURATION; // 0..1
 
-    // apply transform
+    // eased progress 0..1 (accel then decel)
+    const eased = easeInOutCubic(progress);
+
+    // compute angle
+    const angle = (startAngle + TOTAL_ROTATIONS * 360 * eased) % 360;
     svg.style.transform = `rotate(${angle}deg)`;
 
-    // stop the loop if we're stationary and not expecting to move
-    if (Math.abs(velocity) <= EPS && targetVelocity === 0 && !loadingMode) {
-      velocity = 0;
-      lastTs = null;
+    if (clamped < DURATION) {
+      rafId = requestAnimationFrame(frame);
+    } else {
+      // animation complete: clean up and navigate
       cancelAnimationFrame(rafId);
       rafId = null;
+      startTime = null;
+
+      // remove blur and aria-busy
+      document.body.classList.remove('blurred');
       btn.setAttribute('aria-busy', 'false');
-      return;
-    }
 
-    rafId = requestAnimationFrame(loop);
-  }
-
-  // Start spinning toward MAX_VELOCITY
-  function startSpinning() {
-    // if already spinning with good velocity, do nothing but set flags
-    loadingMode = true;
-    btn.setAttribute('aria-busy', 'true');
-
-    targetVelocity = MAX_VELOCITY;
-    if (!rafId) {
-      lastTs = null;
-      rafId = requestAnimationFrame(loop);
+      // small timeout to allow UI paint, then navigate
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 40);
     }
   }
 
-  // Smoothly stop spinning (decelerate to 0)
-  function stopSpinning() {
-    loadingMode = false;
-    targetVelocity = 0;
-    // ensure loop running to decelerate
-    if (!rafId) {
-      lastTs = null;
-      rafId = requestAnimationFrame(loop);
-    }
-  }
-
-  // Click handler - start spinning. If page already loaded, stop after a short run.
+  // click handler: start the timed ease animation and blur content
   btn.addEventListener('click', (e) => {
-    e.preventDefault();     // prevent immediate navigation
+    e.preventDefault();
 
-    startSpinning();
+    // if an animation is already running, ignore
+    if (rafId) return;
 
-    // Wait 2 seconds, then navigate to test.html
-    setTimeout(() => {
-      window.location.href = "index.html";
-   }, 2000);
+    // capture current rotation as starting angle so animation continues smoothly
+    const currentTransform = window.getComputedStyle(svg).transform;
+    if (currentTransform && currentTransform !== 'none') {
+      // parse matrix to extract rotation angle
+      const values = currentTransform.split('(')[1].split(')')[0].split(',');
+      const a = parseFloat(values[0]);
+      const b = parseFloat(values[1]);
+      // angle in degrees
+      startAngle = Math.round(Math.atan2(b, a) * (180 / Math.PI));
+    } else {
+      startAngle = 0;
+    }
+
+    // set busy state and blur content
+    btn.setAttribute('aria-busy', 'true');
+    document.body.classList.add('blurred');
+
+    // start the animation loop (will run exactly DURATION ms and then navigate)
+    startTime = null;
+    rafId = requestAnimationFrame(frame);
   });
 
-
-  // When the page finishes loading, decelerate to stop
+  // accessibility: if page load finishes and animation not triggered, clear busy state
   window.addEventListener('load', () => {
-    // allow a brief time for spinner to show then stop
-    // if spinner hasn't been triggered by click but the site loaded, do nothing
-    if (btn.getAttribute('aria-busy') === 'true' || loadingMode) {
-      // give a very small delay to feel natural
-      setTimeout(() => stopSpinning(), 300);
+    if (!rafId) {
+      document.body.classList.remove('blurred');
+      btn.setAttribute('aria-busy', 'false');
     }
   });
-
-  // Optional: if user navigates away/start fetch you can call startSpinning() programmatically.
 
 })();
 </script>
