@@ -21,7 +21,11 @@
   }
 
   .content {
-    transition: filter 320ms ease, opacity 320ms ease;
+    transition:
+      filter 320ms ease,
+      opacity 320ms ease,
+      /* animation speed doubled (slower) */
+      transform 560ms cubic-bezier(0.33, 0.00, 0.20, 1.00);
   }
 
   body.blurred .content {
@@ -29,12 +33,17 @@
     pointer-events: none;
   }
 
+  /* when menu tray is open, push content down (match tray height) */
+  body.menu-open .content {
+    transform: translateY(400px);
+  }
+
   h1 { font-weight: 600; }
 
-  .nav-button {
+  .nav-button,
+  .menu-button {
     position: fixed;
     top: 22px;
-    left: 22px;
     width: 56px;
     height: 56px;
     border-radius: 20px;
@@ -43,49 +52,157 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    /* normal (idle) shadow */
     box-shadow: 0px 9px 27px -5px rgba(0,0,0,0.2);
     cursor: pointer;
     padding: 0;
     z-index: 999;
-    outline: none; /* remove default outline on click */
-    /* ⭐ NEW — smooth shadow animation */
+    outline: none;
     transition: box-shadow 800ms ease-in-out;
   }
 
-  /* remove movement on hover/click */
-  .nav-button:hover,
-  .nav-button:active { transform: none; }
+  .nav-button { left: 22px; }
+  .menu-button { right: 22px; }
 
-  /* keep a visible focus ring for keyboard users only */
-  .nav-button:focus { outline: none; }
-  .nav-button:focus-visible {
+  .nav-button:hover,
+  .nav-button:active,
+  .menu-button:hover,
+  .menu-button:active {
+    transform: none;
+  }
+
+  .nav-button:focus,
+  .menu-button:focus { outline: none; }
+
+  .nav-button:focus-visible,
+  .menu-button:focus-visible {
     outline: 3px solid rgba(60,60,60,0.10);
     outline-offset: 2px;
   }
 
   .nav-button svg {
+    width: 26px;   /* slightly smaller logo */
+    height: 26px;
+    will-change: transform;
+    display: block;
+  }
+
+  .menu-button svg {
     width: 28px;
     height: 28px;
     will-change: transform;
     display: block;
-  }
-  
-  /*
-    When loading (clicked / waiting), remove the stroke (outline)
-    and reduce the box-shadow to a softer one.
-  */
-  .nav-button[aria-busy="true"] {
-    outline: none; /* no stroke while clicked */
-    box-shadow: 0px 4px 12px -3px rgba(0,0,0,0.12); /* reduced shadow */
+    transition: transform 200ms ease;
   }
 
+  .nav-button[aria-busy="true"] {
+    outline: none;
+    box-shadow: 0px 4px 12px -3px rgba(0,0,0,0.12);
+  }
+
+  /* Gradually hide button shadows when menu is open */
+  body.menu-open .nav-button,
+  body.menu-open .menu-button {
+    box-shadow: 0 0 0 0 rgba(0,0,0,0);
+  }
+
+  /* Menu icon ↔ X animation */
+  .menu-button .icon-menu,
+  .menu-button .icon-close {
+    transform-origin: center;
+    transition:
+      opacity 180ms ease,
+      transform 220ms ease;
+  }
+
+  .menu-button .icon-close {
+    opacity: 0;
+    transform: scale(0.8) rotate(-10deg);
+  }
+
+  .menu-button.open .icon-menu {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  .menu-button.open .icon-close {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+
+  /* TOP TRAY MENU PANEL */
+  .menu-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    width: 100%;
+    max-width: 100%;
+    background-color: #ffffff;
+    /* box-shadow removed as requested */
+    padding: 16px 0 12px 0;
+
+    /* height for pushing content (matches body.menu-open translateY) */
+    height: 400px;
+
+    z-index: 998;
+
+    opacity: 1;
+
+    /* start hidden above the viewport */
+    transform: translateY(-100%);
+    /* animation speed doubled (slower) */
+    transition:
+      transform 560ms cubic-bezier(0.33, 0.00, 0.20, 1.00);
+    pointer-events: none;
+  }
+
+  .menu-panel.open {
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .menu-items-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .menu-item {
+    display: block;
+    padding: 8px 0;
+    text-align: left;
+    font-size: 14px;
+    font-weight: 500;
+    color: #222;
+    text-decoration: none;
+  }
+
+  .menu-item:hover {
+    background-color: #f5f5f5;
+  }
+
+  /* Dimmed overlay under tray */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.25);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 997;
+    transition: opacity 560ms ease;
+  }
+
+  body.menu-open .overlay {
+    opacity: 1;
+    pointer-events: auto;
+  }
 </style>
 </head>
 
 <body>
 
-<!-- local uploaded file path included as requested -->
+<!-- Back button -->
 <button class="nav-button" aria-label="Back" data-screenshot-url="/mnt/data/Screenshot 2025-11-17 at 3.51.48 PM.png" aria-busy="false">
   <svg id="spin-svg" width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
     <path d="M25.601 10.236C28.4282 10.236 30.72 7.9449 30.72 5.11872C30.72 2.29254 28.4282 0.00146484 25.601 0.00146484C22.7739 0.00146484 20.4821 2.29254 20.4821 5.11872C20.4821 7.9449 22.7739 10.236 25.601 10.236Z" fill="#3C3C3C"/>
@@ -94,6 +211,35 @@
     <path d="M9.80356 7.18341C9.82474 7.1384 9.84328 7.0934 9.86182 7.05104C9.88036 7.00869 9.883 6.9981 9.89624 6.96898C10.1684 6.26817 10.2827 5.51603 10.2311 4.76605C10.1795 4.01607 9.96321 3.28666 9.59765 2.6297C9.23209 1.97275 8.72622 1.40437 8.11601 0.965C7.50581 0.525628 6.80627 0.22605 6.06712 0.0875704C5.32797 -0.0509097 4.56737 -0.0248895 3.83942 0.163779C3.11147 0.352447 2.43405 0.69913 1.85532 1.17917C1.27659 1.65922 0.810772 2.26083 0.490993 2.94123C0.171214 3.62164 0.00532578 4.36412 0.00512695 5.11587C0.00512695 5.2853 0.00512655 5.45208 0.0316088 5.61886C0.0316088 5.65327 0.0316096 5.68504 0.0448507 5.71945C0.574496 10.5084 7.45988 14.9056 12.804 15.3477C12.7987 15.3583 7.19241 13.1954 9.80356 7.18341Z" fill="#3C3C3C"/>
   </svg>
 </button>
+
+<!-- Menu button (right side) -->
+<button class="menu-button" aria-label="Open menu" aria-expanded="false">
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+    <!-- Hamburger icon -->
+    <g class="icon-menu">
+      <rect x="4" y="6" width="16" height="2" rx="1" />
+      <rect x="4" y="11" width="16" height="2" rx="1" />
+      <rect x="4" y="16" width="16" height="2" rx="1" />
+    </g>
+    <!-- X icon -->
+    <g class="icon-close">
+      <rect x="5" y="11" width="14" height="2" rx="1" transform="rotate(45 12 12)" />
+      <rect x="5" y="11" width="14" height="2" rx="1" transform="rotate(-45 12 12)" />
+    </g>
+  </svg>
+</button>
+
+<!-- Top tray menu panel -->
+<nav class="menu-panel" aria-label="Main menu">
+  <div class="menu-items-inner">
+    <a href="#work" class="menu-item">Work</a>
+    <a href="#about" class="menu-item">About</a>
+    <a href="#contact" class="menu-item">Contact</a>
+  </div>
+</nav>
+
+<!-- Overlay under tray -->
+<div class="overlay" aria-hidden="true"></div>
 
 <main class="content">
   <h1>Something is brewing. V2</h1>
@@ -104,88 +250,69 @@
   const svg = document.getElementById('spin-svg');
   const btn = svg.closest('.nav-button');
 
-  // preserved uploaded-file local path (provided)
   const screenshotUrl = btn.dataset.screenshotUrl || '/mnt/data/Screenshot 2025-11-17 at 3.51.48 PM.png';
 
-  // state
   let rafId = null;
   let startTime = null;
   let startAngle = 0;
 
-  // animation settings (entire animation lasts exactly DURATION ms)
-  const DURATION = 2000;        // ms (2 seconds total)
-  const TOTAL_ROTATIONS = 3;    // how many full rotations over the duration (tweakable)
+  const DURATION = 2000;
+  const TOTAL_ROTATIONS = 3;
 
-  // easing: easeInOutCubic
   function easeInOutCubic(t) {
     return t < 0.5
       ? 4 * t * t * t
       : 1 - Math.pow(-2 * t + 2, 3) / 2;
   }
 
-  // render frame for time-based eased animation
   function frame(now) {
     if (!startTime) startTime = now;
     const elapsed = now - startTime;
     const clamped = Math.min(elapsed, DURATION);
-    const progress = clamped / DURATION; // 0..1
-
-    // eased progress 0..1 (accel then decel)
+    const progress = clamped / DURATION;
     const eased = easeInOutCubic(progress);
 
-    // compute angle
     const angle = (startAngle + TOTAL_ROTATIONS * 360 * eased) % 360;
     svg.style.transform = `rotate(${angle}deg)`;
 
     if (clamped < DURATION) {
       rafId = requestAnimationFrame(frame);
     } else {
-      // animation complete: clean up and navigate
       cancelAnimationFrame(rafId);
       rafId = null;
       startTime = null;
 
-      // remove blur and aria-busy
       document.body.classList.remove('blurred');
       btn.setAttribute('aria-busy', 'false');
 
-      // small timeout to allow UI paint, then navigate
       setTimeout(() => {
         window.location.href = 'test.html';
       }, 40);
     }
   }
 
-  // click handler: start the timed ease animation and blur content
   btn.addEventListener('click', (e) => {
     e.preventDefault();
 
-    // if an animation is already running, ignore
     if (rafId) return;
 
-    // capture current rotation as starting angle so animation continues smoothly
     const currentTransform = window.getComputedStyle(svg).transform;
     if (currentTransform && currentTransform !== 'none') {
-      // parse matrix to extract rotation angle
       const values = currentTransform.split('(')[1].split(')')[0].split(',');
       const a = parseFloat(values[0]);
       const b = parseFloat(values[1]);
-      // angle in degrees
       startAngle = Math.round(Math.atan2(b, a) * (180 / Math.PI));
     } else {
       startAngle = 0;
     }
 
-    // set busy state and blur content
     btn.setAttribute('aria-busy', 'true');
     document.body.classList.add('blurred');
 
-    // start the animation loop (will run exactly DURATION ms and then navigate)
     startTime = null;
     rafId = requestAnimationFrame(frame);
   });
 
-  // accessibility: if page load finishes and animation not triggered, clear busy state
   window.addEventListener('load', () => {
     if (!rafId) {
       document.body.classList.remove('blurred');
@@ -193,6 +320,39 @@
     }
   });
 
+  // Menu logic
+  const menuBtn = document.querySelector('.menu-button');
+  const menuPanel = document.querySelector('.menu-panel');
+
+  function closeMenu() {
+    menuPanel.classList.remove('open');
+    menuBtn.setAttribute('aria-expanded', 'false');
+    menuBtn.classList.remove('open');
+    document.body.classList.remove('menu-open');
+  }
+
+  menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = !menuPanel.classList.contains('open');
+
+    menuPanel.classList.toggle('open', isOpen);
+    menuBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    menuBtn.classList.toggle('open', isOpen);
+    document.body.classList.toggle('menu-open', isOpen);
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!menuPanel.classList.contains('open')) return;
+    if (menuPanel.contains(e.target)) return;
+    if (menuBtn.contains(e.target)) return;
+    closeMenu();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeMenu();
+    }
+  });
 })();
 </script>
 
