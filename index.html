@@ -17,13 +17,20 @@
 
   body.theme-dark {
     /* Dark mode = inverted from light */
-    --bg-color: #222222;      /* was text */
+    --bg-color: #282828;      /* was text */
     --text-color: #f4f4f4;    /* was background */
     --surface-color: #222222;
-    --shadow-color: rgba(0,0,0,0.6);
+     --shadow-color: rgba(244, 244, 244, 0.18);
 
-    --button-bg: #f4f4f4;     /* light pill on dark bg */
-    --button-fg: #222222;
+    --button-bg: var(--surface-color);
+    --button-fg: #f4f4f4;
+  }
+  body.theme-dark .nav-button svg path {
+    fill: #f4f4f4 !important;
+  }
+
+  body.theme-dark .menu-button svg rect {
+  fill: #f4f4f4 !important;
   }
 
   html, body {
@@ -75,7 +82,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0px 9px 27px -5px var(--shadow-color);
+    box-shadow: 0px 0px 15px -3px var(--shadow-color);
     cursor: pointer;
     padding: 0;
     z-index: 999;
