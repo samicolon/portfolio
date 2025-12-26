@@ -231,14 +231,16 @@
     margin-top: 24px;
     padding: 14px 16px;
     border-radius: 16px;
+    
 
     /* Light mode: black frame with white text */
     background-color: #222222;
     color: #f4f4f4;
     display: flex;
-    align-items: center;
+    flex-direction: column;
     justify-content: space-between;
     gap: 16px;
+    align-items: flex-start;
 
     transition:
       background-color 260ms ease,
@@ -262,6 +264,7 @@
 
   .theme-toggle {
     min-width: 110px;
+    width: 100%;
     padding: 6px 14px;
     border-radius: 999px;
     border: 1px solid transparent;
