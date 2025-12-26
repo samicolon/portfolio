@@ -4,6 +4,28 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
+  :root {
+    --bg-color: #f4f4f4;
+    --text-color: #222222;
+    --surface-color: #ffffff;
+    --shadow-color: rgba(0,0,0,0.2);
+
+    /* buttons get their own theme vars */
+    --button-bg: #ffffff;
+    --button-fg: #222222;
+  }
+
+  body.theme-dark {
+    /* Dark mode = inverted from light */
+    --bg-color: #222222;      /* was text */
+    --text-color: #f4f4f4;    /* was background */
+    --surface-color: #222222;
+    --shadow-color: rgba(0,0,0,0.6);
+
+    --button-bg: #f4f4f4;     /* light pill on dark bg */
+    --button-fg: #222222;
+  }
+
   html, body {
     height: 100%;
     margin: 0;
@@ -14,17 +36,17 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    background-color: #f4f4f4;
-    color: #222;
+    background-color: var(--bg-color);
+    color: var(--text-color);
     font-family: 'Inter', sans-serif;
-    transition: filter 320ms ease;
+    transition: background-color 260ms ease, color 260ms ease, filter 320ms ease;
   }
 
   .content {
     transition:
       filter 320ms ease,
       opacity 320ms ease,
-      /* animation speed doubled (slower) */
+      /* slower tray push */
       transform 560ms cubic-bezier(0.33, 0.00, 0.20, 1.00);
   }
 
@@ -48,16 +70,20 @@
     height: 56px;
     border-radius: 20px;
     border: none;
-    background-color: #ffffff;
+    background-color: var(--button-bg);
+    color: var(--button-fg);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0px 9px 27px -5px rgba(0,0,0,0.2);
+    box-shadow: 0px 9px 27px -5px var(--shadow-color);
     cursor: pointer;
     padding: 0;
     z-index: 999;
     outline: none;
-    transition: box-shadow 800ms ease-in-out;
+    transition:
+      box-shadow 800ms ease-in-out,
+      background-color 260ms ease,
+      color 260ms ease;
   }
 
   .nav-button { left: 22px; }
@@ -80,7 +106,7 @@
   }
 
   .nav-button svg {
-    width: 26px;   /* slightly smaller logo */
+    width: 26px;
     height: 26px;
     will-change: transform;
     display: block;
@@ -135,12 +161,13 @@
     top: 0;
     left: 0;
     right: 0;
-   
+
     width: 100%;
     max-width: 100%;
-    background-color: #ffffff;
-    /* box-shadow removed as requested */
-    padding: 100px 0 12px 0;
+    background-color: var(--surface-color);
+
+    /* 56px padding so content clears underneath the floating buttons */
+    padding: 56px 0 12px 0;
 
     /* height for pushing content (matches body.menu-open translateY) */
     height: 400px;
@@ -151,10 +178,12 @@
 
     /* start hidden above the viewport */
     transform: translateY(-100%);
-    /* animation speed doubled (slower) */
     transition:
-      transform 560ms cubic-bezier(0.33, 0.00, 0.20, 1.00);
+      transform 560ms cubic-bezier(0.33, 0.00, 0.20, 1.00),
+      background-color 260ms ease,
+      color 260ms ease;
     pointer-events: none;
+    color: var(--text-color);
   }
 
   .menu-panel.open {
@@ -165,8 +194,15 @@
   .menu-items-inner {
     max-width: 960px;
     margin: 0 auto;
-    padding: 0 24px;
+    padding: 56px 24px 0 24px;
+
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: 32px;
+    row-gap: 18px;
+    align-items: start;
   }
+
 
   .menu-item {
     display: block;
@@ -174,12 +210,95 @@
     text-align: left;
     font-size: 14px;
     font-weight: 500;
-    color: #222;
+    color: var(--text-color);
     text-decoration: none;
+    transition: background-color 180ms ease, color 180ms ease;
   }
 
   .menu-item:hover {
-    background-color: #f5f5f5;
+    background-color: rgba(0,0,0,0.06);
+  }
+
+  /* Appearance frame (opposite of current mode) */
+  .appearance-frame {
+    margin-top: 24px;
+    padding: 14px 16px;
+    border-radius: 16px;
+
+    /* Light mode: black frame with white text */
+    background-color: #222222;
+    color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    transition:
+      background-color 260ms ease,
+      color 260ms ease,
+      border-color 260ms ease;
+  }
+
+  body.theme-dark .appearance-frame {
+    /* Dark mode: white frame with black text */
+    background-color: #f4f4f4;
+    color: #222222;
+  }
+
+  .appearance-title {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    opacity: 0.9;
+  }
+
+  .theme-toggle {
+    min-width: 110px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition:
+      background-color 160ms ease,
+      color 160ms ease,
+      border-color 160ms ease;
+  }
+
+  .theme-icon {
+    font-size: 13px;
+  }
+
+  .theme-text {
+    font-size: 12px;
+  }
+
+  /* Light mode: frame dark, button light */
+  .appearance-frame .theme-toggle {
+    background-color: #f4f4f4;   /* light */
+    color: #222222;              /* dark text */
+    border-color: rgba(0,0,0,0.15);
+  }
+
+  .appearance-frame .theme-toggle:hover {
+    background-color: #ffffff;
+  }
+
+  /* Dark mode: frame light, button dark */
+  body.theme-dark .appearance-frame .theme-toggle {
+    background-color: #222222;   /* dark */
+    color: #f4f4f4;              /* light text */
+    border-color: rgba(0,0,0,0.3);
+  }
+
+  body.theme-dark .appearance-frame .theme-toggle:hover {
+    background-color: #000000;
   }
 
   /* Dimmed overlay under tray */
@@ -232,10 +351,31 @@
 <!-- Top tray menu panel -->
 <nav class="menu-panel" aria-label="Main menu">
   <div class="menu-items-inner">
+
+  <!-- Column 1 -->
+  <div class="menu-col">
     <a href="#work" class="menu-item">Work</a>
     <a href="#about" class="menu-item">About</a>
     <a href="#contact" class="menu-item">Contact</a>
   </div>
+
+  <!-- Column 2 (empty for now — expandable for future sections) -->
+  <div class="menu-col">
+    <!-- Add anything you want later -->
+  </div>
+
+  <!-- Column 3 -->
+  <div class="menu-col">
+    <div class="appearance-frame">
+      <div class="appearance-title">Appearance</div>
+      <button type="button" class="theme-toggle" aria-pressed="false">
+        <span class="theme-icon" aria-hidden="true">☀️</span>
+        <span class="theme-text">Light</span>
+      </button>
+    </div>
+  </div>
+
+</div>
 </nav>
 
 <!-- Overlay under tray -->
@@ -352,6 +492,43 @@
     if (e.key === 'Escape') {
       closeMenu();
     }
+  });
+
+  // Theme toggle with persistence + icon/text swap
+  const themeToggleBtn = document.querySelector('.theme-toggle');
+  const themeIcon = themeToggleBtn.querySelector('.theme-icon');
+  const themeText = themeToggleBtn.querySelector('.theme-text');
+
+ function setTheme(isDark) {
+  // isDark = "dark theme is currently active"
+  document.body.classList.toggle('theme-dark', isDark);
+  themeToggleBtn.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+
+  if (isDark) {
+    // We are IN dark mode now → button offers Light
+    themeIcon.textContent = '☀️';
+    themeText.textContent = 'Light';
+    localStorage.setItem('theme', 'dark');
+  } else {
+    // We are IN light mode now → button offers Dark
+    themeIcon.textContent = '🌙';
+    themeText.textContent = 'Dark';
+    localStorage.setItem('theme', 'light');
+  }
+}
+
+
+  // Initialize from localStorage (default: light)
+  const storedTheme = localStorage.getItem('theme');
+  if (storedTheme === 'dark') {
+    setTheme(true);
+  } else {
+    setTheme(false);
+  }
+
+  themeToggleBtn.addEventListener('click', () => {
+    const isDark = !document.body.classList.contains('theme-dark');
+    setTheme(isDark);
   });
 })();
 </script>
