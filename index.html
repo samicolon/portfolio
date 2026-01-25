@@ -13,7 +13,7 @@
     --button-bg: #ffffff;
     --button-fg: #222222;
 
-    --card-border: rgba(0,0,0,0.08);
+    --card-border: rgba(0,0,0,0.10);
   }
 
   body.theme-dark {
@@ -25,7 +25,7 @@
     --button-bg: var(--surface-color);
     --button-fg: #f4f4f4;
 
-    --card-border: rgba(244,244,244,0.14);
+    --card-border: rgba(244,244,244,0.16);
   }
 
   html, body { height: 100%; margin: 0; }
@@ -172,8 +172,8 @@
     min-height: 100vh;
     display: grid;
     align-items: center;
-
-    /* leave room for fixed buttons */
+    gap: 28px;
+    
   }
 
   .hero-kicker {
@@ -186,7 +186,7 @@
   }
 
   .hero-title {
-    font-size: clamp(30px, 3.6vw, 52px);
+    font-size: clamp(30px, 3.6vw, 56px);
     line-height: 1.06;
     font-weight: 600;
     margin: 0 0 12px 0;
@@ -203,7 +203,7 @@
   .hero-photo {
     width: 100%;
     aspect-ratio: 4 / 3;
-    border-radius: 22px;
+    border-radius: 24px;
     overflow: hidden;
     background: var(--surface-color);
     border: 1px solid var(--card-border);
@@ -220,92 +220,81 @@
   @media (min-width: 900px) {
     .hero {
       grid-template-columns: 1.15fr 0.85fr;
-      gap: 36px;
-      padding-bottom: 64px
+      gap: 44px;
+      padding-top: 140px;
     }
+    .hero-photo { aspect-ratio: 3 / 4; }
   }
 
-  /* ===== Case studies stacked ===== */
+  /* ===== Case studies: each section is 100vh ===== */
   .work-section {
-    padding: 54px 0 84px 0;
+    padding: 0;
   }
 
-  .section-title {
-    margin: 0 0 16px 0;
-    font-size: 16px;
-    font-weight: 700;
-    letter-spacing: 0.01em;
-    opacity: 0.95;
-  }
-
-  .case-stack {
+  .case-section {
+    min-height: 100vh;
     display: grid;
-    gap: 16px;
+    place-items: center;
+    padding: 48px 0;
   }
 
-  .case-card {
+  /* small centered “frame” */
+  .case-frame {
+    width: min(860px, calc(100% - 48px));
     background: var(--surface-color);
     border: 1px solid var(--card-border);
-    border-radius: 22px;
+    border-radius: 24px;
     overflow: hidden;
+    box-shadow: 0px 18px 48px -24px var(--shadow-color);
     text-decoration: none;
     color: inherit;
-    box-shadow: 0px 14px 38px -22px var(--shadow-color);
     transition: transform 180ms ease, box-shadow 180ms ease;
-    display: grid;
-    grid-template-columns: 1fr;
   }
 
-  .case-card:hover {
+  .case-frame:hover {
     transform: translateY(-2px);
-    box-shadow: 0px 18px 46px -24px var(--shadow-color);
+    box-shadow: 0px 22px 56px -26px var(--shadow-color);
   }
 
-  .case-cover {
+  .case-image {
+    width: 100%;
     aspect-ratio: 16 / 9;
     background: linear-gradient(120deg, rgba(0,0,0,0.06), rgba(0,0,0,0.00));
   }
-  body.theme-dark .case-cover {
-    background: linear-gradient(120deg, rgba(244,244,244,0.10), rgba(244,244,244,0.00));
+
+  .case-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
 
-  .case-body {
+  .case-info {
     padding: 18px 18px 20px 18px;
     display: grid;
     gap: 8px;
   }
 
+  /* title uses “subheading font” vibe */
   .case-title {
     margin: 0;
-    font-weight: 700;
-    font-size: 16px;
+    font-weight: 600;
+    font-size: 18px;
     letter-spacing: 0.01em;
   }
 
-  .case-subhead {
+  /* year uses body copy */
+  .case-year {
     margin: 0;
     font-size: 13px;
-    line-height: 1.5;
-    opacity: 0.85;
-    max-width: 70ch;
+    opacity: 0.8;
   }
 
-  .case-meta {
-    margin-top: 6px;
-    font-size: 12px;
-    opacity: 0.75;
-  }
-
-  /* on wider screens, show cover + text side-by-side (still stacked list) */
-  @media (min-width: 860px) {
-    .case-card {
-      grid-template-columns: 280px 1fr;
-    }
-    .case-cover {
-      aspect-ratio: auto;
-      height: 100%;
-      min-height: 180px;
-    }
+  /* keep frames nicer on larger screens */
+  @media (min-width: 900px) {
+    .case-frame { width: min(920px, calc(100% - 96px)); }
+    .case-info { padding: 22px 24px 24px 24px; }
+    .case-title { font-size: 20px; }
   }
 
   /* mobile-friendly menu */
@@ -377,38 +366,46 @@
       </div>
     </section>
 
-    <!-- WORK / CASE STUDIES (STACKED) -->
+    <!-- CASE STUDIES: EACH ONE IS 100vh WITH A CENTER FRAME -->
     <section class="work-section" id="work">
-      <h2 class="section-title">Selected Case Studies</h2>
 
-      <div class="case-stack">
-        <a class="case-card" href="#case-1">
-          <div class="case-cover"></div>
-          <div class="case-body">
+      <section class="case-section" id="case-1">
+        <a class="case-frame" href="#case-1-details">
+          <div class="case-image">
+            <!-- replace image -->
+            <img src="assets/case-1.jpg" alt="Case Study One cover">
+          </div>
+          <div class="case-info">
             <h3 class="case-title">Case Study One</h3>
-            <p class="case-subhead">A short one-line description that explains the outcome or the challenge.</p>
-            <div class="case-meta">Role • Tools • Year</div>
+            <p class="case-year">2024</p>
           </div>
         </a>
+      </section>
 
-        <a class="case-card" href="#case-2">
-          <div class="case-cover"></div>
-          <div class="case-body">
+      <section class="case-section" id="case-2">
+        <a class="case-frame" href="#case-2-details">
+          <div class="case-image">
+            <img src="assets/case-2.jpg" alt="Case Study Two cover">
+          </div>
+          <div class="case-info">
             <h3 class="case-title">Case Study Two</h3>
-            <p class="case-subhead">A brief subheading line that tells what this project is about.</p>
-            <div class="case-meta">Role • Tools • Year</div>
+            <p class="case-year">2023</p>
           </div>
         </a>
+      </section>
 
-        <a class="case-card" href="#case-3">
-          <div class="case-cover"></div>
-          <div class="case-body">
+      <section class="case-section" id="case-3">
+        <a class="case-frame" href="#case-3-details">
+          <div class="case-image">
+            <img src="assets/case-3.jpg" alt="Case Study Three cover">
+          </div>
+          <div class="case-info">
             <h3 class="case-title">Case Study Three</h3>
-            <p class="case-subhead">One sentence describing the impact, process, or what makes it interesting.</p>
-            <div class="case-meta">Role • Tools • Year</div>
+            <p class="case-year">2022</p>
           </div>
         </a>
-      </div>
+      </section>
+
     </section>
 
     <div id="about" style="height: 1px;"></div>
